@@ -24,7 +24,7 @@ st.markdown("---")
 
 with st.sidebar:
     st.header("⚙️ Cài đặt tham số")
-    popular_stocks = ["VNM", "VCB", "BID", "CTG", "FPT", "MWG", "ACB", "SSI", "GAS", "VIC"]
+    popular_stocks = Vnstock().stock().listing.symbols_by_group('VN30')
     symbol = st.selectbox("**Chọn mã chứng khoán**", popular_stocks, index=0)
     start_date = st.date_input("**Ngày bắt đầu**", pd.to_datetime("2023-01-01"))
     end_date = st.date_input("**Ngày kết thúc**", pd.to_datetime("today"))
