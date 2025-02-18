@@ -38,7 +38,7 @@ placeholder = st.empty()
 while True:
     with placeholder.container():
         try:
-            # Tạo container chính
+            # Create main container
             with st.container():
                 # Section 1: Biểu đồ chính và MA
                 col1, col2 = st.columns([4, 1])
