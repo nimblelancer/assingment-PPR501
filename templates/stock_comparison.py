@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from vnstock import Vnstock
-import constants
+import constants.strings as strings
 
 def stock_comparison_screen(start_date, end_date, tickers):
     # Initialize session_state if not exist
@@ -34,9 +34,9 @@ def stock_comparison_screen(start_date, end_date, tickers):
                                             hovertemplate='%{y:,.3f} VND<br>%{x|%Y-%m-%d}'))
 
             fig.update_layout(title=dict(
-                                text=constants.STOCK_COMPARISON_TITLE,
+                                text=strings.STOCK_COMPARISON_TITLE,
                                 font=dict(size=28)
                             ),xaxis_title="Date", yaxis_title="Price (VND)")
             st.plotly_chart(fig)
         except Exception as e:
-            st.error(constants.ERROR_MESSAGE.format(e))
+            st.error(strings.ERROR_MESSAGE.format(e))

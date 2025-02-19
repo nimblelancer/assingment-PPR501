@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from vnstock import Vnstock
-import constants
+import constants.strings as strings
 
 def vnindex_screen(start_date, end_date):
     st.subheader("VNINDEX Information")
@@ -16,18 +16,18 @@ def vnindex_screen(start_date, end_date):
 
     col_left, col_right = st.columns([3, 1])
     with col_left:
-        ma_period = st.slider(constants.MOVING_AVERAGE_PERIOD, min_value=5, max_value=50, value=20)
-        show_ma = st.checkbox(constants.MOVING_AVERAGE_TOGGLE, value=True)
+        ma_period = st.slider(strings.MOVING_AVERAGE_PERIOD, min_value=5, max_value=50, value=20)
+        show_ma = st.checkbox(strings.MOVING_AVERAGE_TOGGLE, value=True)
 
     with col_right:
-        if st.button(constants.REFRESH_DATA):
+        if st.button(strings.REFRESH_DATA):
             st.session_state.update_data_stock = True
             st.rerun()
 
     if st.session_state.update_data_vnindex:
         try:
-            stock = Vnstock().stock(symbol=constants.VNINDEX, source='VCI')
-            df = stock.quote.history(symbol=constants.VNINDEX, start=start_date.strftime('%Y-%m-%d'), 
+            stock = Vnstock().stock(symbol=strings.VNINDEX, source='VCI')
+            df = stock.quote.history(symbol=strings.VNINDEX, start=start_date.strftime('%Y-%m-%d'), 
                 end=end_date.strftime('%Y-%m-%d'), interval="1D")
 
             if not df.empty:
@@ -49,7 +49,7 @@ def vnindex_screen(start_date, end_date):
                                             hovertemplate='%{y:,.3f} VND<br>%{x|%Y-%m-%d}'))
 
                 fig.update_layout(title=dict(
-                                text=constants.MAIN_CHART_TITLE,
+                                text=strings.MAIN_CHART_TITLE,
                                 font=dict(size=28)
                             ), xaxis_title="Date", yaxis_title="Price (VND)", 
                                 xaxis=dict(showgrid=True), yaxis=dict(showgrid=True, tickformat=",.3f VND"),
@@ -57,28 +57,28 @@ def vnindex_screen(start_date, end_date):
 
                 st.plotly_chart(fig)
 
-            st.subheader(constants.MARKET_INFO_TITLE)
+            st.subheader(strings.MARKET_INFO_TITLE)
             col3, col4, col5 = st.columns(3)
 
             with col3:
                 current_price = f"{df['close'].iloc[-1]:,.3f} VND"
-                st.markdown(constants.CURRENT_PRICE.format(constants.VNINDEX))
+                st.markdown(strings.CURRENT_PRICE.format(strings.VNINDEX))
                 st.markdown(f"<h2 style='color: #2a4d8f;'>{current_price}</h2>", unsafe_allow_html=True)
 
             with col4:
                 ma_price = f"{df['MA'].iloc[-1]:,.3f} VND"
-                st.markdown(constants.MOVING_AVERAGE_PRICE.format(ma_period))
+                st.markdown(strings.MOVING_AVERAGE_PRICE.format(ma_period))
                 st.markdown(f"<h2 style='color: #ff6b35;'>{ma_price}</h2>", unsafe_allow_html=True)
 
             with col5:
-                trend = constants.TREND_UP if df['close'].iloc[-1] > df['MA'].iloc[-1] else constants.TREND_DOWN
-                st.markdown(constants.TREND_FORECAST)
-                st.markdown(f"<h2 style='color: {'#2ecc71' if constants.TREND_UP in trend else '#e74c3c'};'>{trend}</h2>", unsafe_allow_html=True)
+                trend = strings.TREND_UP if df['close'].iloc[-1] > df['MA'].iloc[-1] else strings.TREND_DOWN
+                st.markdown(strings.TREND_FORECAST)
+                st.markdown(f"<h2 style='color: {'#2ecc71' if strings.TREND_UP in trend else '#e74c3c'};'>{trend}</h2>", unsafe_allow_html=True)
 
-            st.subheader(constants.RAW_DATA_TITLE)
+            st.subheader(strings.RAW_DATA_TITLE)
             df.rename(columns={"date": "Date", "open": "Open", 
                                     "volume": "Volume", "high": "High", "low": "Low", "close": "Close", "ma": "MA"}, 
                                     inplace=True)
             st.dataframe(df.sort_index(ascending=False), height=400, use_container_width=True)
         except Exception as e:
-            st.error(constants.ERROR_MESSAGE.format(e))
+            st.error(strings.ERROR_MESSAGE.format(e))
