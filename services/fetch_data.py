@@ -4,39 +4,39 @@ import pandas as pd
 from constants import strings
 
 def fetch_vnindex_data(start_date, end_date):
-    """Lấy dữ liệu VNINDEX từ API."""
+    """Get VNINDEX data from API."""
     try:
         stock = Vnstock().stock(symbol=strings.VNINDEX, source='VCI')
-        df = stock.quote.history(symbol=strings.VNINDEX, start=start_date.strftime('%Y-%m-%d'), 
-            end=end_date.strftime('%Y-%m-%d'), interval="1D")
+        df = stock.quote.history(symbol=strings.VNINDEX, start=start_date, 
+            end=end_date, interval="1D")
         if df.empty:
-            print("⚠️ Không có dữ liệu VNINDEX!")
+            print("⚠️ No VNINDEX data!")
         return df
     except Exception as e:
-        print(f"❌ Lỗi khi fetch VNINDEX: {e}")
+        print(f"❌ Error when fetching VNINDEX: {e}")
         return pd.DataFrame()
 
 def fetch_stock_data(symbol, start_date, end_date):
-    """Lấy dữ liệu cổ phiếu từ API."""
+    """Get stock data from API."""
     try:
         stock = Vnstock().stock(symbol=symbol, source='VCI')
-        df = stock.quote.history(symbol=symbol, start=start_date.strftime('%Y-%m-%d'), 
-                             end=end_date.strftime('%Y-%m-%d'), interval="1m")
+        df = stock.quote.history(symbol=symbol, start=start_date, 
+            end=end_date, interval="1m")
         if df.empty:
-            print(f"⚠️ Không có dữ liệu cho {symbol}!")
+            print(f"⚠️No data for {symbol}!")
         return df
     except Exception as e:
-        print(f"❌ Lỗi khi fetch {symbol}: {e}")
+        print(f"❌ Error when fetching {symbol}: {e}")
         return pd.DataFrame()
     
 def fetch_order_book_stock_data(symbol):
-    """Lấy dữ liệu khớp lệnh cổ phiếu từ API."""
+    """Get stock order matching data from API."""
     try:
         stock = Vnstock().stock(symbol=symbol, source='VCI')
         order_book_df = stock.quote.intraday(symbol=symbol, show_log=False)
         if order_book_df.empty:
-            print(f"⚠️ Không có dữ liệu cho {symbol}!")
+            print(f"⚠️ No data for {symbol}!")
         return order_book_df
     except Exception as e:
-        print(f"❌ Lỗi khi fetch {symbol}: {e}")
+        print(f"❌ Error when fetching {symbol}: {e}")
         return pd.DataFrame()

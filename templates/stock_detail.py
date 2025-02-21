@@ -1,26 +1,18 @@
-import threading
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from concurrent.futures import ThreadPoolExecutor
 from vnstock import Vnstock
 import constants.strings as strings
-from database.database import save_stock_prices, get_stock_prices, save_order_book, get_order_book
+from database.database import get_stock_prices, get_order_book
 
-# 🛠 Tạo ThreadPoolExecutor để giới hạn số thread chạy đồng thời
-executor = ThreadPoolExecutor(max_workers=2)
 
-def fetch_stock_data(symbol, start_date, end_date):
-    """ Lấy dữ liệu chứng khoán từ API hoặc database """
-    stock = Vnstock().stock(symbol=symbol, source='VCI')
+def fetch_stock_data(stock, symbol, start_date, end_date):
+    """ Get stock data from API or database """
     df = stock.quote.history(symbol=symbol, start=start_date.strftime('%Y-%m-%d'), 
                              end=end_date.strftime('%Y-%m-%d'), interval="1m")
 
     if df.empty:
         df = get_stock_prices(symbol, start_date, end_date)
-    # else:
-    #     df_copy = df.copy()  # 🔹 Sao chép DataFrame để tránh lỗi `KeyError`
-    #     executor.submit(save_stock_prices, symbol, df_copy)  # 🔹 Chạy thread tối ưu
 
     if df.empty:
         st.error(strings.ERROR_NO_DATA.format(symbol, start_date, end_date))
@@ -33,22 +25,20 @@ def fetch_stock_data(symbol, start_date, end_date):
     return df
 
 def plot_stock_chart(df, show_ma, ma_period):
-    """ Vẽ biểu đồ giá cổ phiếu """
+    """ Draw stock price chart """
     fig = go.Figure()
 
-    # 📈 Giá đóng cửa
     fig.add_trace(go.Scatter(
         x=df.index, y=df['close'], mode='lines',
         name='Closing Price', line=dict(color='#2a4d8f', width=2),
         hovertemplate='%{y:,.3f} VND<br>%{x|%Y-%m-%d}'
     ))
 
-    # 📉 Đường trung bình động (MA)
     if show_ma:
-        if 'MA' in df.columns:
-            df.drop(columns=['MA'], inplace=True)  # 🔹 Xóa cột MA cũ nếu đã tồn tại
-        
-        df['MA'] = df['close'].rolling(window=ma_period).mean()  # 🔹 Tạo lại MA mới
+        if any(col.lower() == 'ma' for col in df.columns):  # Kiểm tra cả 'ma' và 'MA'
+            df.drop(columns=[col for col in df.columns if col.lower() == 'ma'], inplace=True)
+    
+        df['MA'] = df['close'].rolling(window=ma_period).mean()
         
         fig.add_trace(go.Scatter(
             x=df.index, y=df['MA'], mode='lines',
@@ -56,7 +46,6 @@ def plot_stock_chart(df, show_ma, ma_period):
             hovertemplate='%{y:,.3f} VND<br>%{x|%Y-%m-%d}'
         ))
 
-    # 🎨 Layout
     fig.update_layout(
         title=dict(text=strings.MAIN_CHART_TITLE, font=dict(size=28)),
         xaxis_title="Date", yaxis_title="Price (VND)",
@@ -68,7 +57,7 @@ def plot_stock_chart(df, show_ma, ma_period):
 
 
 def display_market_info(df, symbol, ma_period):
-    """ Hiển thị thông tin thị trường """
+    """ Display market information """
     st.subheader(strings.MARKET_INFO_TITLE)
     col1, col2, col3 = st.columns(3)
 
@@ -87,16 +76,13 @@ def display_market_info(df, symbol, ma_period):
         st.markdown(f"<h2 style='color: {trend_color};'>{trend}</h2>", unsafe_allow_html=True)
 
 def display_order_book(stock, symbol):
-    """ Hiển thị Order Book """
+    """ Display Order Book """
     st.subheader(strings.ORDER_BOOK_TITLE)
     try:
         order_book_df = stock.quote.intraday(symbol=symbol, show_log=False)
         
         if order_book_df.empty: 
             order_book_df = get_order_book(symbol)
-        # else: 
-        #     order_book_df_copy = order_book_df.copy()  # 🔹 Sao chép DataFrame để tránh lỗi `KeyError`
-        #     executor.submit(save_order_book, symbol, order_book_df_copy)  # 🔹 Chạy thread tối ưu
 
         order_book_df.rename(columns={"time": "Time", "price": "Price", "volume": "Volume", 
                                       "match_type": "Type", "id": "ID"}, inplace=True)
@@ -105,15 +91,16 @@ def display_order_book(stock, symbol):
         order_book_df = get_order_book(symbol)
         
 def display_raw_data(df):
-    """ Hiển thị dữ liệu gốc """
+    """ Show original data """
     st.subheader(strings.RAW_DATA_TITLE)
     
+    df = df.loc[:, ~df.columns.duplicated()]  # Xóa cột trùng lặp trước khi rename
     df.rename(columns={"date": "Date", "open": "Open", "volume": "Volume", 
-                       "high": "High", "low": "Low", "close": "Close"}, inplace=True)
+                   "high": "High", "low": "Low", "close": "Close"}, inplace=True)
     st.dataframe(df.sort_index(ascending=False), height=400, use_container_width=True)
 
 def stock_detail_screen(symbol, start_date, end_date):
-    """ Màn hình chi tiết cổ phiếu """
+    """Stock detail screen"""
     st.subheader(f"Stock Detail: {symbol}")
 
     # 🛠 Setup session_state
@@ -134,9 +121,9 @@ def stock_detail_screen(symbol, start_date, end_date):
             st.session_state.update_data_stock = True
             st.rerun()
 
-    # 🔄 Cập nhật dữ liệu chứng khoán
+    stock = Vnstock().stock(symbol=symbol, source='VCI')
     if st.session_state.update_data_stock:
-        df = fetch_stock_data(symbol, start_date, end_date)
+        df = fetch_stock_data(stock, symbol, start_date, end_date)
         if df is not None:
             st.session_state.stock_data = df
             st.session_state.update_data_stock = False
@@ -145,7 +132,7 @@ def stock_detail_screen(symbol, start_date, end_date):
 
     df = st.session_state.stock_data
     df.columns = df.columns.str.lower()
-    # 📊 Hiển thị biểu đồ & thông tin thị trường
+    
     plot_stock_chart(df, show_ma, ma_period)
     display_market_info(df, symbol, ma_period)
 
@@ -153,8 +140,6 @@ def stock_detail_screen(symbol, start_date, end_date):
     tab1, tab2 = st.tabs([strings.ORDER_BOOK_TAB, strings.RAW_DATA_TAB])
 
     with tab1:
-        # display_order_book(stock, symbol)
-        print()
-
+        display_order_book(stock, symbol)
     with tab2:
         display_raw_data(df)
