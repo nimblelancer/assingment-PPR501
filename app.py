@@ -1,10 +1,17 @@
+import os
 import streamlit as st
 import constants.strings as strings
+import pandas as pd
 from templates.vnindex_infor import vnindex_screen
 from templates.stock_detail import stock_detail_screen
 from templates.stock_comparison import stock_comparison_screen
 from vnstock import Vnstock
-import pandas as pd
+from database.database import init_db
+
+
+# Check the database file is exist, if not init the database
+if not os.path.exists(strings.DATABASE_FILENAME):
+    init_db()
 
 st.set_page_config(page_title="Stock Analytics", layout="wide", page_icon="📈")
 
