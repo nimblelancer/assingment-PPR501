@@ -4,6 +4,8 @@ STOCK_SELECTION = "**Select Stock Code**"
 START_DATE = "**Start Date**"
 END_DATE = "**End Date**"
 COMPARISON_SELECTION = "**Compare with Other Stocks**"
+STOCK_PREDICT="**Stock Price Predict**"
+STOCK_PREDICT_MODEL=['Linear Regression','Logistic Regression (TODO)','Random Forest (TODO)','LSTM (TODO)','Transformer (TODO)']
 
 # Main Page
 APP_TITLE = "📈 Vietnam Stock Market Analytics"
@@ -42,3 +44,8 @@ VNINDEX = 'VNINDEX'
 
 # Action
 REFRESH_DATA = "🔄 Refresh Data"
+
+DATABASE_FILENAME = "stock_data.db"
+DATABASE_URL = "sqlite:///SQLite/stock_data.db"
+
+DATABASE_ABS_PATH = 'SQLite\\stock_data.db'
