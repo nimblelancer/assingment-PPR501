@@ -47,7 +47,7 @@ screen_placeholder = st.empty()
 screen_mapping = {
     "comparison": (len(tickers_to_compare) >= 2, stock_comparison_screen, (start_date, end_date, tickers_to_compare)),
     "detail": (symbol is not None, stock_detail_screen, (symbol, start_date, end_date)),
-    "predict": (model_predict is not None, stock_predict_screen, (model_predict))
+    "predict": (model_predict is not None, stock_predict_screen, ())
 }
 
 # Default screen is vnindex_screen
