@@ -28,7 +28,7 @@ def train_model(symbol: str):
     df['returns'] = df['close'].pct_change()
     df['volatility'] = df['returns'].rolling(window=5).std()
     df['ma_10'] = df['close'].rolling(window=10).mean()
-    # Check and process data is miss
+    # Check and process data is missed
     df.dropna(inplace=True)
     
     X = df[['time', 'open', 'high', 'low', 'volume', 'ma_10', 'volatility']]

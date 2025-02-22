@@ -45,7 +45,6 @@ VNINDEX = 'VNINDEX'
 # Action
 REFRESH_DATA = "🔄 Refresh Data"
 
-DATABASE_FILENAME = "stock_data.db"
 DATABASE_URL = "sqlite:///SQLite/stock_data.db"
 
 DATABASE_ABS_PATH = 'SQLite\\stock_data.db'
