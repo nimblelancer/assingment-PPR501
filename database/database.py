@@ -12,6 +12,13 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy.sql import func
 
 # Database configuration
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SQLITE_DIR = os.path.join(BASE_DIR, "SQLite")
+
+# Create SQLite folder if not exist
+if not os.path.exists(SQLITE_DIR):
+    os.makedirs(SQLITE_DIR)
+
 engine = create_engine(strings.DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
