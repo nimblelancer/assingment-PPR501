@@ -1,6 +1,5 @@
 streamlit
 vnstock
-sqlite3
 pandas
 matplotlib
 plotly
