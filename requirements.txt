@@ -2,12 +2,8 @@ streamlit
 vnstock
 sqlite3
 pandas
-numpy
 matplotlib
+plotly
 scikit-learn
-flask
-flask-sqlalchemy
-flask-wtf
-jinja2
-requests
 schedule
+APScheduler
